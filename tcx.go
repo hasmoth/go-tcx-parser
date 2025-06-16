@@ -13,9 +13,13 @@ import (
 type Tcx struct {
 	XMLName      xml.Name   `xml:"TrainingCenterDatabase"`
 	XMLNs        string     `xml:"xmlns,attr"`
-	XMLNsXsi     string     `xml:"xsi,attr,omitempty"`
+	XMLNs2       string     `xml:"xmlns ns2,attr"`
+	XMLNs3       string     `xml:"xmlns ns3,attr"`
+	XMLNs4       string     `xml:"xmlns ns4,attr"`
+	XMLNs5       string     `xml:"xmlns ns5,attr"`
+	XMLNsXsi     string     `xml:"xmlns xsi,attr,omitempty"`
 	XMLNsXsd     string     `xml:"xsd,attr,omitempty"`
-	XMLSchemaLoc string     `xml:"schemaLocation,attr,omitempty"`
+	XMLSchemaLoc string     `xml:"xsi schemaLocation,attr,omitempty"`
 	Activities   []Activity `xml:"Activities>Activity"`
 }
 
@@ -27,9 +31,17 @@ type Activity struct {
 }
 
 type Creator struct {
-	Name      string `xml:"Name"`
-	UnitID    int    `xml:"UnitId"`
-	ProductID int    `xml:"ProductID"`
+	Name      string  `xml:"Name"`
+	UnitID    int     `xml:"UnitId"`
+	ProductID int     `xml:"ProductID"`
+	Version   Version `xml:"Version,omitempty"`
+}
+
+type Version struct {
+	VersionMajor int `xml:"VersionMajor"`
+	VersionMinor int `xml:"VersionMinor"`
+	BuildMajor   int `xml:"BuildMajor"`
+	BuildMinor   int `xml:"BuildMinor"`
 }
 
 type Lap struct {
@@ -38,24 +50,35 @@ type Lap struct {
 	DistanceInMeters           float64      `xml:"DistanceMeters"`
 	MaximumSpeedInMetersPerSec float64      `xml:"MaximumSpeed"`
 	Calories                   float64      `xml:"Calories"`
+	AverageHeartRateBpm        HeartRate    `xml:"AverageHeartRateBpm"`
+	MaximumHeartRateBpm        HeartRate    `xml:"MaximumHeartRateBpm"`
 	Intensity                  string       `xml:"Intensity"`
 	TriggerMethod              string       `xml:"TriggerMethod"`
 	Track                      []Trackpoint `xml:"Track>Trackpoint"`
 }
 
+type HeartRate struct {
+	Value int `xml:"Value"`
+}
+
 type Trackpoint struct {
-	Time               time.Time  `xml:"Time"`
-	LatitudeInDegrees  float64    `xml:"Position>LatitudeDegrees"`
-	LongitudeInDegrees float64    `xml:"Position>LongitudeDegrees"`
-	AltitudeInMeters   float64    `xml:"AltitudeMeters"`
-	HeartRateInBpm     int        `xml:"HeartRateBpm>Value"`
-	Cadence            int        `xml:"Cadence"`
-	Extensions         Extensions `xml:"Extensions"`
+	Time             time.Time  `xml:"Time"`
+	Position         Position   `xml:"Position"`
+	AltitudeInMeters float64    `xml:"AltitudeMeters"`
+	DistanceMeters   float64    `xml:"DistanceMeters"`
+	HeartRateInBpm   HeartRate  `xml:"HeartRateBpm"`
+	Cadence          int        `xml:"Cadence"`
+	Extensions       Extensions `xml:"Extensions"`
+}
+
+type Position struct {
+	LatitudeInDegrees  float64 `xml:"LatitudeDegrees"`
+	LongitudeInDegrees float64 `xml:"LongitudeDegrees"`
 }
 
 type Extensions struct {
-	TrackPoint TPX `xml:"TPX"`
-	Lap        LX  `xml:"LX"`
+	TrackPoint TPX `xml:"ns3 TPX"`
+	Lap        LX  `xml:"ns3 LX"`
 	Course     CX  `xml:"CX"`
 }
 
@@ -131,7 +154,7 @@ func (a *Activity) AverageHeartbeat() float64 {
 	var nbhr int = 0
 	for _, l := range a.Laps {
 		for _, p := range l.Track {
-			totalhr += p.HeartRateInBpm
+			totalhr += p.HeartRateInBpm.Value
 			nbhr += 1
 		}
 	}
