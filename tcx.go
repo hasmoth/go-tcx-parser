@@ -103,7 +103,7 @@ type CX struct {
 }
 
 type Pace struct {
-	float64
+	Value float64
 }
 
 // Parse parses a TCX reader and return a Tcx object.
@@ -162,13 +162,13 @@ func (a *Activity) AverageHeartbeat() float64 {
 }
 
 func (p *Pace) String() string {
-	intpart, fracpart := math.Modf(p.float64)
+	intpart, fracpart := math.Modf(p.Value)
 	return fmt.Sprintf("%.f:%.f", intpart, fracpart*60)
 }
 
 func GetPaceFromSpeedInMs(speed float64) *Pace {
 	var p *Pace = new(Pace)
-	p.float64 = 50 / (speed * 3)
+	p.Value = 50 / (speed * 3)
 	return p
 }
 
